@@ -36,7 +36,6 @@ def load_data():
 
 
 def load_sample_data():
-    """Demo data if model hasn't been run yet."""
     fi = pd.DataFrame({
         "feature": ["Contract_Month-to-month", "tenure", "MonthlyCharges",
                      "TotalCharges", "InternetService_Fiber optic",
@@ -68,11 +67,9 @@ if preds is None:
     st.info("Running in demo mode — showing sample data. Run `python model.py` to load real results.")
     preds, fi, comp = load_sample_data()
 
-# --- HEADER ---
 st.title("📉 Telecom Customer Churn Prediction")
 st.caption("Machine Learning model comparing Logistic Regression vs Random Forest · IBM Telco Dataset")
 
-# --- MODEL COMPARISON METRICS ---
 st.markdown("---")
 st.subheader("Model Performance Comparison")
 cols = st.columns(len(comp))
@@ -92,7 +89,6 @@ for i, row in comp.iterrows():
         """, unsafe_allow_html=True)
 st.markdown("---")
 
-# --- CHARTS ---
 row1a, row1b = st.columns(2)
 
 with row1a:
@@ -142,19 +138,22 @@ with row2a:
 with row2b:
     st.subheader("Tenure vs Churn Probability")
     if "tenure" in preds.columns:
+        sample = preds.sample(min(500, len(preds)))
+        sample = sample.copy()
+        sample["Churn Status"] = sample["actual_churn"].astype(str).map({"0": "No Churn", "1": "Churned"})
         fig4 = px.scatter(
-            preds.sample(min(500, len(preds))),
-            x="tenure", y="rf_probability",
-            color=preds["actual_churn"].astype(str).map({"0": "No Churn", "1": "Churned"}),
+            sample,
+            x="tenure",
+            y="rf_probability",
+            color="Churn Status",
             color_discrete_map={"No Churn": "#1D9E75", "Churned": "#E24B4A"},
             opacity=0.5,
-            labels={"tenure": "Tenure (months)", "rf_probability": "Churn Probability"},
+            labels={"tenure": "Tenure (months)", "rf_probability": "Churn Probability"}
         )
         fig4.update_layout(legend_title="Actual",
                            margin=dict(l=0, r=0, t=10, b=0), height=330)
         st.plotly_chart(fig4, use_container_width=True)
 
-# --- KEY INSIGHTS ---
 st.markdown("---")
 st.subheader("Key Business Insights")
 c1, c2, c3 = st.columns(3)
